@@ -1,0 +1,57 @@
+module demux1x8 (
+    input  wire       D,
+    input  wire [2:0] S,
+    output reg  [7:0] Y
+);
+
+    always @(*) begin
+        // default (avoid latch)
+        Y = 8'b0000_0000;
+
+        case (S)
+            3'b000: Y[0] = D;
+            3'b001: Y[1] = D;
+            3'b010: Y[2] = D;
+            3'b011: Y[3] = D;
+            3'b100: Y[4] = D;
+            3'b101: Y[5] = D;
+            3'b110: Y[6] = D;
+            3'b111: Y[7] = D;
+        endcase
+    end
+
+endmodule
+
+
+`timescale 1ns/1ps
+
+module tb_demux1x8;
+
+    reg        D;
+    reg  [2:0] S;
+    wire [7:0] Y;
+
+    // Instantiate DUT
+    demux1x8 dut (
+        .D(D),
+        .S(S),
+        .Y(Y)
+    );
+
+    initial begin
+        // Header
+        $display("------ 1x8 DEMUX TESTBENCH ------");
+        $display(" Time |  D |  S  |        Y");
+        $display("----------------------------------");
+
+        // Monitor (auto prints on any change)
+        $monitor(" %4t |  %b | %b | %b",
+                  $time, D, S, Y);
+
+        // Apply test vectors (no loop)
+        D = 1;
+
+        S = 3'b000; #10;
+        S = 3'b001; #10;
+        S = 3'b010; #10;
+        S = 3'b01

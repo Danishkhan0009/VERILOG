@@ -1,0 +1,76 @@
+CLA 
+
+module cla_4bit (
+    input  [3:0] A, B,
+    input        Cin,
+    output [3:0] Sum,
+    output       Cout
+);
+
+wire [3:0] G, P;
+wire [4:0] C;
+
+assign C[0] = Cin;
+
+// Generate and Propagate
+assign G = A & B;
+assign P = A ^ B;
+
+// Carry look-ahead logic
+assign C[1] = G[0] | (P[0] & C[0]);
+assign C[2] = G[1] | (P[1] & G[0]) | (P[1] & P[0] & C[0]);
+assign C[3] = G[2] | (P[2] & G[1]) | (P[2] & P[1] & G[0]) 
+                       | (P[2] & P[1] & P[0] & C[0]);
+assign C[4] = G[3] | (P[3] & G[2]) | (P[3] & P[2] & G[1]) 
+                       | (P[3] & P[2] & P[1] & G[0]) 
+                       | (P[3] & P[2] & P[1] & P[0] & C[0]);
+
+// Sum and Cout
+assign Sum  = P ^ C[3:0];
+assign Cout = C[4];
+
+endmodule
+
+
+
+
+
+
+`timescale 1ns/1ps
+
+module tb_cla_4bit;
+
+    reg  [3:0] A, B;
+    reg        Cin;
+    wire [3:0] Sum;
+    wire       Cout;
+
+    // Instantiate DUT
+    cla_4bit dut (
+        .A(A),
+        .B(B),
+        .Cin(Cin),
+        .Sum(Sum),
+        .Cout(Cout)
+    );
+
+    initial begin
+        // Header
+        $display("Time  A    B    Cin | Sum  Cout");
+        $display("--------------------------------");
+
+        // Monitor changes
+        $monitor("%4t  %b  %b   %b  | %b    %b",
+                  $time, A, B, Cin, Sum, Cout);
+
+        // Test cases
+        A = 4'b0000; B = 4'b0000; Cin = 0; #10;
+        A = 4'b0011; B = 4'b0101; Cin = 0; #10; // 3 + 5 = 8
+        A = 4'b1111; B = 4'b0001; Cin = 0; #10; // 15 + 1 = 16
+        A = 4'b1010; B = 4'b0101; Cin = 1; #10; // 10 + 5 + 1
+        A = 4'b1111; B = 4'b1111; Cin = 1; #10; // Max case
+
+        #10 $finish;
+    end
+
+endmodule

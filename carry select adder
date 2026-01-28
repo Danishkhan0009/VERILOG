@@ -1,0 +1,155 @@
+`timescale 1ns / 1ps
+
+module CSA_4bit (
+	input  [3:0] A,
+	input  [3:0] B,
+	input        Cin,
+	output [3:0] Sum,
+	output       Cout
+);
+
+	// Internal wires for intermediate carries and sums
+	wire [3:0] Sum_Cin0;
+	wire [3:0] Sum_Cin1;
+	wire       Cout_Cin0;
+	wire       Cout_Cin1;
+
+	// Generate sums and carries for Cin = 0
+	FA FA0_CIN0 (.A(A[0]), .B(B[0]), .Cin(1'b0), .Sum(Sum_Cin0[0]), .Cout(Cout_Cin0_0));
+	FA FA1_CIN0 (.A(A[1]), .B(B[1]), .Cin(Cout_Cin0_0), .Sum(Sum_Cin0[1]), .Cout(Cout_Cin0_1));
+	FA FA2_CIN0 (.A(A[2]), .B(B[2]), .Cin(Cout_Cin0_1), .Sum(Sum_Cin0[2]), .Cout(Cout_Cin0_2));
+	FA FA3_CIN0 (.A(A[3]), .B(B[3]), .Cin(Cout_Cin0_2), .Sum(Sum_Cin0[3]), .Cout(Cout_Cin0));
+
+	// Generate sums and carries for Cin = 1
+	FA FA0_CIN1 (.A(A[0]), .B(B[0]), .Cin(1'b1), .Sum(Sum_Cin1[0]), .Cout(Cout_Cin1_0));
+	FA FA1_CIN1 (.A(A[1]), .B(B[1]), .Cin(Cout_Cin1_0), .Sum(Sum_Cin1[1]), .Cout(Cout_Cin1_1));
+	FA FA2_CIN1 (.A(A[2]), .B(B[2]), .Cin(Cout_Cin1_1), .Sum(Sum_Cin1[2]), .Cout(Cout_Cin1_2));
+	FA FA3_CIN1 (.A(A[3]), .B(B[3]), .Cin(Cout_Cin1_2), .Sum(Sum_Cin1[3]), .Cout(Cout_Cin1));
+
+	// Multiplexers for selecting the correct sums and carry
+	assign Sum[0] = (Cin) ? Sum_Cin1[0] : Sum_Cin0[0];
+	assign Sum[1] = (Cin) ? Sum_Cin1[1] : Sum_Cin0[1];
+	assign Sum[2] = (Cin) ? Sum_Cin1[2] : Sum_Cin0[2];
+	assign Sum[3] = (Cin) ? Sum_Cin1[3] : Sum_Cin0[3];
+	assign Cout   = (Cin) ? Cout_Cin1   : Cout_Cin0;
+
+endmodule
+
+// Full Adder module
+module FA (
+	input  A,
+	input  B,
+	input  Cin,
+	output Sum,
+	output Cout
+);
+
+	assign Sum  = A ^ B ^ Cin;
+	assign Cout = (A & B) | (B & Cin) | (A & Cin);
+
+endmodule
+
+`timescale 1ns / 1ps
+
+module CSA_16bit (
+    input  [15:0] A,    // 16-bit input A
+    input  [15:0] B,    // 16-bit input B
+    input        Cin,   // Carry-in
+    output [15:0] Sum,  // 16-bit sum output
+    output       Cout   // Carry-out
+);
+
+    // Intermediate wires for carry and sum connections between blocks
+    wire [3:0] Sum0, Sum1, Sum2, Sum3; // Sums for each 4-bit block
+    wire C1, C2, C3, C4;               // Carry-outs from each block
+
+    // Instantiate four 4-bit CSAs
+
+    // Least significant 4-bit block
+    CSA_4bit CSA0 (
+        .A(A[3:0]),
+        .B(B[3:0]),
+        .Cin(Cin),
+        .Sum(Sum0),
+        .Cout(C1)
+    );
+
+    // Second 4-bit block
+    CSA_4bit CSA1 (
+        .A(A[7:4]),
+        .B(B[7:4]),
+        .Cin(C1),
+        .Sum(Sum1),
+        .Cout(C2)
+    );
+
+    // Third 4-bit block
+    CSA_4bit CSA2 (
+        .A(A[11:8]),
+        .B(B[11:8]),
+        .Cin(C2),
+        .Sum(Sum2),
+        .Cout(C3)
+    );
+
+    // Most significant 4-bit block
+    CSA_4bit CSA3 (
+        .A(A[15:12]),
+        .B(B[15:12]),
+        .Cin(C3),
+        .Sum(Sum3),
+        .Cout(Cout)
+    );
+
+    // Concatenate the sums from all 4-bit blocks
+    assign Sum = {Sum3, Sum2, Sum1, Sum0};
+
+endmodule
+
+module tb_CSA_16bit;
+
+    // Testbench signals
+    reg [15:0] A;
+    reg [15:0] B;
+    reg Cin;
+    wire [15:0] Sum;
+    wire Cout;
+
+    // Instantiate the DUT (Device Under Test)
+    CSA_16bit DUT (
+        .A(A),
+        .B(B),
+        .Cin(Cin),
+        .Sum(Sum),
+        .Cout(Cout)
+    );
+
+    // Testbench procedure
+    initial begin
+        $monitor($time, " A = %h, B = %h, Cin = %b, Sum = %h, Cout = %b", A, B, Cin, Sum, Cout);
+
+        // Test case 1
+        A = 16'h0001; B = 16'h0001; Cin = 1'b0;
+        #10;
+
+        // Test case 2
+        A = 16'hFFFF; B = 16'h0001; Cin = 1'b0;
+        #10;
+
+        // Test case 3
+        A = 16'h1234; B = 16'h5678; Cin = 1'b1;
+        #10;
+
+        // Test case 4
+        A = 16'hAAAA; B = 16'h5555; Cin = 1'b0;
+        #10;
+
+        // Test case 5
+        A = 16'hFFFF; B = 16'hFFFF; Cin = 1'b1;
+        #10;
+
+        $finish;
+    end
+
+endmodule
+

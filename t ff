@@ -1,0 +1,90 @@
+module t_ff (
+    input  clk,
+    input  t,
+    output reg q
+);
+
+always @(posedge clk) begin
+    if (t)
+        q <= ~q;   // toggle
+    else
+        q <= q;    // hold
+end
+
+endmodule
+
+
+
+
+
+
+module t_latch (
+    input  t,
+    input  en,
+    output reg q
+);
+
+always @(t or en) begin
+    if (en) begin
+        if (t)
+            q = ~q;   // toggle
+        // else hold
+    end
+end
+
+endmodule
+
+`timescale 1ns/1ps
+
+module tb_t_ff;
+
+reg clk;
+reg t;
+wire q;
+
+// DUT instantiation
+t_ff dut (
+    .clk(clk),
+    .t(t),
+    .q(q)
+);
+
+// Clock generation (10 ns period)
+always #5 clk = ~clk;
+
+initial begin
+    clk = 0;
+    t   = 0;
+
+    // Hold
+    #10 t = 0;
+
+    // Toggle
+    #10 t = 1;
+
+    // Toggle again
+    #10 t = 1;
+
+    // Hold
+    #10 t = 0;
+
+    #10 $finish;
+end
+
+initial begin
+    $monitor("Time=%0t | T=%b | Q=%b", $time, t, q);
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+

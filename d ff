@@ -1,0 +1,45 @@
+module d_latch (
+    input  d,
+    input  en,
+    output reg q
+);
+
+always @ (en or d) begin
+    if (en)
+        q = d;
+end
+
+endmodule
+
+always @ (en or d or rst) begin
+    if (rst)
+        q = 1'b0;
+    else if (en)
+        q = d;
+end
+
+
+module d_ff_async_rst (
+    input  clk,
+    input  rst,
+    input  d,
+    output reg q
+);
+
+always @(posedge clk or posedge rst) begin
+    if (rst)
+        q <= 1'b0;
+    else
+        q <= d;
+end
+
+endmodule
+
+
+sync reset
+always @(posedge clk) begin
+    if (rst)
+        q <= 1'b0;
+    else
+        q <= d;
+end

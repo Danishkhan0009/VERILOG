@@ -1,0 +1,111 @@
+module sr_ff (
+    input  clk,
+    input  s,
+    input  r,
+    output reg q
+);
+
+always @(posedge clk) begin
+    case ({s, r})
+        2'b00: q <= q;      // hold
+        2'b01: q <= 1'b0;   // reset
+        2'b10: q <= 1'b1;   // set
+        2'b11: q <= 1'bx;   // invalid
+    endcase
+end
+
+endmodule
+
+
+always @(posedge clk or posedge rst) begin
+    if (rst)
+        q <= 1'b0;
+    else begin
+        case ({s, r})
+            2'b00: q <= q;
+            2'b01: q <= 1'b0;
+            2'b10: q <= 1'b1;
+            2'b11: q <= 1'bx;
+        endcase
+    end
+end
+
+always @(posedge clk) begin
+    if (s && !r)
+        q <= 1'b1;
+    else if (!s && r)
+        q <= 1'b0;
+    else if (!s && !r)
+        q <= q;
+    else
+        q <= 1'bx;   // s=1, r=1
+end
+module sr_latch_nand (
+    input  s_n,
+    input  r_n,
+    output reg q
+);
+
+always @(s_n or r_n) begin
+    if (!s_n && r_n)
+        q = 1'b1;     // set
+    else if (s_n && !r_n)
+        q = 1'b0;     // reset
+end
+
+endmodule
+
+
+
+
+
+
+`timescale 1ns/1ps
+
+module tb_sr_ff;
+
+reg clk;
+reg s;
+reg r;
+wire q;
+
+// Instantiate DUT
+sr_ff dut (
+    .clk(clk),
+    .s(s),
+    .r(r),
+    .q(q)
+);
+
+// Clock generation (10ns period)
+always #5 clk = ~clk;
+
+// Stimulus
+initial begin
+    clk = 0;
+    s   = 0;
+    r   = 0;
+
+    // Hold
+    #10 s = 0; r = 0;
+
+    // Set
+    #10 s = 1; r = 0;
+
+    // Hold
+    #10 s = 0; r = 0;
+
+    // Reset
+    #10 s = 0; r = 1;
+
+    // Invalid
+    #10 s = 1; r = 1;
+
+    #10 $finish;
+end
+
+// Monitor
+initial begin
+    $monitor("Time=%0t | S=%b R=%b Q=%b", $ti
+
+

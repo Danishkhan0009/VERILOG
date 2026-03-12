@@ -1,3 +1,42 @@
+module demux1x4 (
+    input I,
+    input [1:0] S,
+    output reg [3:0] Y
+);
+
+always @(*)
+begin
+    Y = 4'b0000;
+    case(S)
+        2'b00: Y[0] = I;
+        2'b01: Y[1] = I;
+        2'b10: Y[2] = I;
+        2'b11: Y[3] = I;
+    endcase
+end
+
+endmodule
+
+
+module demux_1x2 (
+    input I,
+    input S,
+    output Y0,
+    output Y1
+);
+
+assign Y0 = I & ~S;
+assign Y1 = I & S;
+
+endmodule
+
+
+
+
+
+
+
+
 module demux1x2_if (
     input  wire D,
     input  wire S,

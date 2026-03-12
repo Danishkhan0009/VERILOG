@@ -1,0 +1,209 @@
+counters
+module ripple_counter(
+    input clk,
+    input rst,
+    output reg [3:0] q
+);
+
+always @(posedge clk or posedge rst)
+begin
+    if (rst)
+        q <= 4'b0000;
+    else
+        q <= q + 1;
+end
+
+endmodule
+
+module sync_counter(
+    input clk,
+    input rst,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 0;
+    else
+        q <= q + 1;
+end
+
+endmodule
+
+
+module up_down_counter(
+    input clk,
+    input rst,
+    input up_down,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 0;
+    else if (up_down)
+        q <= q + 1;
+    else
+        q <= q - 1;
+end
+
+endmodule
+
+
+module mod10_counter(
+    input clk,
+    input rst,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 0;
+    else if (q == 9)
+        q <= 0;
+    else
+        q <= q + 1;
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+module ring_counter(
+    input clk,
+    input rst,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 4'b0001;
+    else
+        q <= {q[2:0], q[3]};
+end
+
+endmodule
+
+
+
+
+module johnson_counter(
+    input clk,
+    input rst,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 4'b0000;
+    else
+        q <= {q[2:0], ~q[3]};
+end
+
+endmodule
+
+
+module gray_counter(
+    input clk,
+    input rst,
+    output reg [3:0] gray
+);
+
+reg [3:0] bin;
+
+always @(posedge clk)
+begin
+    if (rst)
+        bin <= 0;
+    else
+        bin <= bin + 1;
+end
+
+always @(*)
+begin
+    gray = bin ^ (bin >> 1);
+end
+
+endmodule
+
+
+
+
+module bcd_counter (
+    input clk,
+    input rst,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 4'b0000;
+    else if (q == 4'b1001)   // 9
+        q <= 4'b0000;
+    else
+        q <= q + 1;
+end
+
+endmodule
+
+
+
+
+module event_counter (
+    input clk,
+    input rst,
+    input event,
+    output reg [3:0] count
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        count <= 4'b0000;
+    else if (event)
+        count <= count + 1;
+end
+
+endmodule
+
+
+
+module universal_counter (
+    input clk,
+    input rst,
+    input ld,
+    input up_down,
+    input [3:0] data_in,
+    output reg [3:0] q
+);
+
+always @(posedge clk)
+begin
+    if (rst)
+        q <= 4'b0000;
+
+    else if (ld)
+        q <= data_in;       // load value
+
+    else if (up_down)
+        q <= q + 1;         // count up
+
+    else
+        q <= q - 1;         // count down
+end
+
+endmodule
+
+

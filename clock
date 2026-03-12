@@ -1,0 +1,49 @@
+module clock_tb;
+
+reg clk;
+
+initial
+    clk = 0;
+
+always #5 clk = ~clk;   // toggle every 5 time units
+
+endmodule
+
+
+
+
+
+module tb;
+
+parameter CLK_PERIOD = 10;
+reg clk;
+
+initial clk = 0;
+
+always #(CLK_PERIOD/2) clk = ~clk;
+
+endmodule
+
+
+
+
+
+
+
+
+module tb;
+
+reg clk;
+reg rst;
+
+initial
+begin
+    clk = 0;
+    rst = 1;
+
+    #10 rst = 0;
+end
+
+always #5 clk = ~clk;
+
+endmodule

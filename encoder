@@ -1,0 +1,85 @@
+module encoder_4x2 (
+    input I0,
+    input I1,
+    input I2,
+    input I3,
+    output Y0,
+    output Y1
+);
+
+assign Y0 = I1 | I3;
+assign Y1 = I2 | I3;
+
+endmodule
+
+module encoder4x2 (
+    input [3:0] I,
+    output reg [1:0] Y
+);
+
+always @(*)
+begin
+    case(I)
+        4'b0001: Y = 2'b00;
+        4'b0010: Y = 2'b01;
+        4'b0100: Y = 2'b10;
+        4'b1000: Y = 2'b11;
+        default: Y = 2'b00;
+    endcase
+end
+
+endmodule
+
+
+
+
+module encoder8x3 (
+    input [7:0] I,
+    output reg [2:0] Y
+);
+
+always @(*)
+begin
+    case(I)
+        8'b00000001: Y = 3'b000;
+        8'b00000010: Y = 3'b001;
+        8'b00000100: Y = 3'b010;
+        8'b00001000: Y = 3'b011;
+        8'b00010000: Y = 3'b100;
+        8'b00100000: Y = 3'b101;
+        8'b01000000: Y = 3'b110;
+        8'b10000000: Y = 3'b111;
+        default: Y = 3'b000;
+    endcase
+end
+
+endmodule
+
+
+module encoder_8x3 (
+    input  [7:0] I,
+    output [2:0] Y
+);
+
+assign Y[0] = I[1] | I[3] | I[5] | I[7];
+assign Y[1] = I[2] | I[3] | I[6] | I[7];
+assign Y[2] = I[4] | I[5] | I[6] | I[7];
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
